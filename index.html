@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMate</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Floating particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="app-card">
+
+            <!-- Header -->
+            <header class="app-header">
+                <h1>📚 StudyMate</h1>
+                <p class="subtitle">Your personal study companion</p>
+                <div class="header-actions">
+                    <button class="icon-btn" id="themeToggle" title="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Daily Quote -->
+            <div class="quote-banner" id="quoteBanner">
+                <i class="fas fa-quote-left"></i>
+                <span id="quoteText">Loading inspiration...</span>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="timer">
+                    <i class="fas fa-clock"></i> Timer
+                </button>
+                <button class="tab-btn" data-tab="tasks">
+                    <i class="fas fa-tasks"></i> Tasks
+                </button>
+                <button class="tab-btn" data-tab="notes">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </button>
+                <button class="tab-btn" data-tab="resources">
+                    <i class="fas fa-graduation-cap"></i> Learn
+                </button>
+                <button class="tab-btn" data-tab="stats">
+                    <i class="fas fa-chart-bar"></i> Stats
+                </button>
+            </nav>
+
+            <!-- ============ TIMER TAB ============ -->
+            <section class="tab-content active" id="tab-timer">
+                <h2>Pomodoro Timer</h2>
+
+                <!-- Timer Mode Selector -->
+                <div class="timer-modes">
+                    <button class="mode-btn active" data-mode="work">Focus</button>
+                    <button class="mode-btn" data-mode="short">Short Break</button>
+                    <button class="mode-btn" data-mode="long">Long Break</button>
+                </div>
+
+                <!-- Circular Timer -->
+                <div class="timer-wrapper">
+                    <svg class="timer-ring" width="220" height="220">
+                        <circle class="timer-ring-bg" cx="110" cy="110" r="100" />
+                        <circle class="timer-ring-progress" id="timerProgress" cx="110" cy="110" r="100" />
+                    </svg>
+                    <div class="timer-display">
+                        <div id="timer">25:00</div>
+                        <div class="timer-label" id="timerLabel">Focus Time</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" id="startBtn" onclick="toggleTimer()">
+                        <i class="fas fa-play"></i> Start
+                    </button>
+                    <button class="btn-secondary" onclick="resetTimer()">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                </div>
+
+                <!-- Session Counter -->
+                <div class="session-tracker">
+                    <span>Sessions completed today:</span>
+                    <div class="session-dots" id="sessionDots"></div>
+                    <span class="session-count" id="sessionCount">0</span>
+                </div>
+
+                <!-- Timer Settings -->
+                <details class="timer-settings">
+                    <summary><i class="fas fa-cog"></i> Timer Settings</summary>
+                    <div class="settings-grid">
+                        <label>
+                            Focus (min)
+                            <input type="number" id="workDuration" value="25" min="1" max="120">
+                        </label>
+                        <label>
+                            Short Break (min)
+                            <input type="number" id="shortBreakDuration" value="5" min="1" max="30">
+                        </label>
+                        <label>
+                            Long Break (min)
+                            <input type="number" id="longBreakDuration" value="15" min="1" max="60">
+                        </label>
+                        <label>
+                            Sessions before long break
+                            <input type="number" id="sessionsBeforeLong" value="4" min="1" max="10">
+                        </label>
+                    </div>
+                    <button class="btn-small" onclick="saveTimerSettings()">Save Settings</button>
+                </details>
+            </section>
+
+            <!-- ============ TASKS TAB ============ -->
+            <section class="tab-content" id="tab-tasks">
+                <h2>Tasks</h2>
+
+                <!-- Task Filters -->
+                <div class="task-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="active">Active</button>
+                    <button class="filter-btn" data-filter="completed">Done</button>
+                </div>
+
+                <div class="task-input">
+                    <input type="text" id="taskInput" placeholder="What do you need to study?" onkeypress="if(event.key==='Enter') addTask()">
+                    <select id="taskPriority" title="Priority">
+                        <option value="low">🟢 Low</option>
+                        <option value="medium" selected>🟡 Medium</option>
+                        <option value="high">🔴 High</option>
+                    </select>
+                    <button class="btn-primary" onclick="addTask()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <ul id="taskList"></ul>
+
+                <div class="task-footer" id="taskFooter" style="display:none;">
+                    <span id="taskCount">0 tasks remaining</span>
+                    <button class="btn-small btn-danger" onclick="clearCompletedTasks()">
+                        <i class="fas fa-trash"></i> Clear Done
+                    </button>
+                </div>
+            </section>
+
+            <!-- ============ NOTES TAB ============ -->
+            <section class="tab-content" id="tab-notes">
+                <h2>Study Notes</h2>
+
+                <div class="notes-input">
+                    <input type="text" id="noteTitle" placeholder="Note title...">
+                    <textarea id="noteContent" placeholder="Write your study notes here..." rows="4"></textarea>
+                    <div class="notes-actions">
+                        <select id="noteCategory" title="Category">
+                            <option value="general">📁 General</option>
+                            <option value="math">📐 Math</option>
+                            <option value="science">🔬 Science</option>
+                            <option value="language">📝 Language</option>
+                            <option value="history">📜 History</option>
+                            <option value="code">💻 Code</option>
+                        </select>
+                        <button class="btn-primary" onclick="addNote()">
+                            <i class="fas fa-save"></i> Save Note
+                        </button>
+                    </div>
+                </div>
+
+                <div class="notes-search">
+                    <input type="text" id="noteSearch" placeholder="Search notes..." oninput="filterNotes()">
+                </div>
+
+                <div class="notes-list" id="notesList"></div>
+            </section>
+
+            <!-- ============ RESOURCES / LEARN TAB ============ -->
+            <section class="tab-content" id="tab-resources">
+                <h2><i class="fas fa-graduation-cap"></i> Study Resources</h2>
+                <p class="section-desc">Type any topic and get instant study links, guides, and book recommendations.</p>
+
+                <!-- Topic Search -->
+                <div class="resource-search">
+                    <div class="resource-search-row">
+                        <input type="text" id="resourceTopic" placeholder="e.g. Photosynthesis, Quadratic Equations, WW2..." onkeypress="if(event.key==='Enter') findResources()">
+                        <select id="resourceSubject" title="Subject">
+                            <option value="auto">Auto-detect</option>
+                            <option value="math">📐 Math</option>
+                            <option value="science">🔬 Science</option>
+                            <option value="language">📝 Language</option>
+                            <option value="history">📜 History</option>
+                            <option value="code">💻 Programming</option>
+                            <option value="business">💼 Business</option>
+                            <option value="art">🎨 Art & Design</option>
+                            <option value="music">🎵 Music</option>
+                            <option value="psychology">🧠 Psychology</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary btn-full" onclick="findResources()">
+                        <i class="fas fa-search"></i> Find Study Resources
+                    </button>
+                </div>
+
+                <!-- Generated Resources -->
+                <div id="resourceResults" class="resource-results"></div>
+
+                <!-- Quick Topics -->
+                <div class="quick-topics">
+                    <h3><i class="fas fa-bolt"></i> Quick Topics</h3>
+                    <div class="topic-chips" id="quickTopicChips">
+                        <button class="topic-chip" onclick="quickSearch('Algebra basics')">Algebra</button>
+                        <button class="topic-chip" onclick="quickSearch('Essay writing tips')">Essay Writing</button>
+                        <button class="topic-chip" onclick="quickSearch('Newton laws of motion')">Physics</button>
+                        <button class="topic-chip" onclick="quickSearch('Cell biology')">Biology</button>
+                        <button class="topic-chip" onclick="quickSearch('World War 2 summary')">WW2 History</button>
+                        <button class="topic-chip" onclick="quickSearch('JavaScript tutorial')">JavaScript</button>
+                        <button class="topic-chip" onclick="quickSearch('Chemical reactions')">Chemistry</button>
+                        <button class="topic-chip" onclick="quickSearch('Python programming')">Python</button>
+                    </div>
+                </div>
+
+                <!-- Study Guide Generator -->
+                <div class="study-guide-section">
+                    <h3><i class="fas fa-map"></i> Study Guide Generator</h3>
+                    <div class="guide-input-row">
+                        <input type="text" id="guideTopicInput" placeholder="Enter a topic for a study plan...">
+                        <button class="btn-primary" onclick="generateStudyGuide()">
+                            <i class="fas fa-magic"></i> Generate
+                        </button>
+                    </div>
+                    <div id="studyGuideOutput" class="study-guide-output"></div>
+                </div>
+
+                <!-- Saved Resources -->
+                <div class="saved-resources-section">
+                    <h3><i class="fas fa-bookmark"></i> Saved Resources <span class="badge" id="savedCount">0</span></h3>
+                    <div id="savedResourcesList" class="saved-resources-list"></div>
+                </div>
+            </section>
+
+            <!-- ============ STATS TAB ============ -->
+            <section class="tab-content" id="tab-stats">
+                <h2>Study Statistics</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-fire stat-icon fire"></i>
+                        <div class="stat-value" id="statStreak">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock stat-icon clock"></i>
+                        <div class="stat-value" id="statMinutes">0</div>
+                        <div class="stat-label">Minutes Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-check-circle stat-icon check"></i>
+                        <div class="stat-value" id="statTasksDone">0</div>
+                        <div class="stat-label">Tasks Done</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-brain stat-icon brain"></i>
+                        <div class="stat-value" id="statSessions">0</div>
+                        <div class="stat-label">Focus Sessions</div>
+                    </div>
+                </div>
+
+                <!-- Weekly Chart -->
+                <div class="chart-container">
+                    <h3>This Week</h3>
+                    <div class="bar-chart" id="weeklyChart"></div>
+                    <div class="chart-labels">
+                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    </div>
+                </div>
+
+                <!-- Knowledge Graph -->
+                <div class="knowledge-graph-container">
+                    <h3><i class="fas fa-project-diagram"></i> Knowledge Graph</h3>
+                    <div class="knowledge-graph" id="knowledgeGraph"></div>
+                    <div class="kg-legend">
+                        <span class="kg-legend-item"><span class="kg-legend-dot mastered"></span> Mastered</span>
+                        <span class="kg-legend-item"><span class="kg-legend-dot learning"></span> Learning</span>
+                        <span class="kg-legend-item"><span class="kg-legend-dot weak"></span> Weak</span>
+                        <span class="kg-legend-item"><span class="kg-legend-dot unexplored"></span> Unexplored</span>
+                    </div>
+                </div>
+
+                <!-- Weakness Heatmap -->
+                <div class="heatmap-container">
+                    <h3><i class="fas fa-fire-alt"></i> Weakness Heatmap</h3>
+                    <div class="heatmap-grid" id="weaknessHeatmap"></div>
+                </div>
+
+                <!-- Achievements -->
+                <div class="achievements">
+                    <h3>Achievements</h3>
+                    <div class="achievement-grid" id="achievementGrid"></div>
+                </div>
+
+                <button class="btn-small btn-danger" onclick="resetStats()" style="margin-top:1rem;">
+                    <i class="fas fa-trash"></i> Reset All Stats
+                </button>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- ============ ABOUT / FOOTER ============ -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">📚 StudyMate</span>
+                <p>Your all-in-one study companion — built to help you focus, learn, and grow.</p>
+            </div>
+            <div class="footer-about">
+                <h4>About StudyMate</h4>
+                <p>StudyMate is a feature-packed study app designed to boost your productivity and keep you motivated. It includes a <strong>Pomodoro Timer</strong> for focused study sessions, a <strong>Task Manager</strong> to stay organized, a <strong>Notes</strong> system with resource integration, a <strong>Learn</strong> tab that finds YouTube videos, textbooks, and generates study guides, <strong>Stats & Achievements</strong> to track your progress, and a <strong>Study Buddy</strong> AI chatbot that motivates you and keeps you company.</p>
+            </div>
+            <div class="footer-features">
+                <h4>Features</h4>
+                <ul>
+                    <li><i class="fas fa-clock"></i> Pomodoro Timer</li>
+                    <li><i class="fas fa-tasks"></i> Task Manager</li>
+                    <li><i class="fas fa-sticky-note"></i> Notes & Resources</li>
+                    <li><i class="fas fa-graduation-cap"></i> Study Guides & Links</li>
+                    <li><i class="fas fa-chart-bar"></i> Stats & Achievements</li>
+                    <li><i class="fas fa-robot"></i> AI Study Buddy</li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                <p>Made with 💜 by <strong>Chizy</strong></p>
+                <p class="footer-year">&copy; 2026 StudyMate. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============ STUDY BUDDY AI ============ -->
+    <button class="buddy-fab" id="buddyFab" onclick="toggleBuddyChat()" title="Study Buddy AI">
+        <i class="fas fa-robot"></i>
+        <span class="buddy-fab-pulse"></span>
+    </button>
+
+    <div class="gpt-panel" id="buddyChat">
+        <!-- Header -->
+        <div class="gpt-header">
+            <div class="gpt-header-left">
+                <div class="gpt-avatar">🤖</div>
+                <div class="gpt-header-info">
+                    <strong>Study Buddy</strong>
+                    <small id="gptStatusText">Your friendly study companion</small>
+                </div>
+            </div>
+            <div class="gpt-header-right">
+                <button class="gpt-hdr-btn" onclick="toggleGPTExpand()" title="Expand"><i class="fas fa-expand-alt" id="gptExpandIcon"></i></button>
+                <button class="gpt-hdr-btn" onclick="clearBuddyChat()" title="Clear chat"><i class="fas fa-eraser"></i></button>
+                <button class="gpt-hdr-btn" onclick="toggleBuddyChat()"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="gpt-quick-actions">
+            <button class="gpt-quick-btn" onclick="buddyQuickAction('motivate')">Motivate me</button>
+            <button class="gpt-quick-btn" onclick="buddyQuickAction('tip')">Study tip</button>
+            <button class="gpt-quick-btn" onclick="buddyQuickAction('remind')">Remind me</button>
+            <button class="gpt-quick-btn" onclick="buddyQuickAction('stressed')">I'm stressed</button>
+            <button class="gpt-quick-btn" onclick="buddyQuickAction('about')">About app</button>
+        </div>
+
+        <!-- Chat Body -->
+        <div class="gpt-body" id="buddyChatBody"></div>
+
+        <!-- Input -->
+        <div class="gpt-input-wrap">
+            <textarea id="buddyInput" rows="1" placeholder="Chat with your study buddy..." onkeydown="handleGPTKey(event)" oninput="gptAutoResize(this)"></textarea>
+            <button class="gpt-send" onclick="sendBuddyMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
